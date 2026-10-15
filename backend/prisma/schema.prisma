@@ -1,0 +1,55 @@
+enum FuelType {
+  GASOLINA
+  ETANOL
+  FLEX
+  DIESEL
+  GNV
+  ELETRICO
+  HIBRIDO
+}
+
+enum VehicleType {
+  CARRO
+  MOTO
+  CAMINHONETE
+  CAMINHAO
+  ONIBUS
+  OUTRO
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String    @db.VarChar(150)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  vehicles     Vehicle[]
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Vehicle {
+  id              String      @id @default(uuid())
+  imageUrl        String?     @map("image_url") @db.VarChar(500)
+  plate           String      @unique @db.VarChar(7)
+  chassis         String      @unique @db.VarChar(17)
+  renavam         String      @unique @db.VarChar(11)
+  brand           String      @db.VarChar(100)
+  model           String      @db.VarChar(100)
+  manufactureYear Int         @map("manufacture_year")
+  modelYear       Int         @map("model_year")
+  color           String      @db.VarChar(50)
+  fuel            FuelType
+  type            VehicleType
+  nickname        String?     @db.VarChar(100)
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("vehicles")
+}
