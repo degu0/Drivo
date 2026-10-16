@@ -15,6 +15,7 @@ const env_1 = require("./config/env");
 const prisma_module_1 = require("./prisma/prisma.module");
 const core_1 = require("@nestjs/core");
 const nestjs_zod_1 = require("nestjs-zod");
+const users_module_1 = require("./users/users.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -27,6 +28,7 @@ exports.AppModule = AppModule = __decorate([
                 validate: env_1.validateEnv,
             }),
             prisma_module_1.PrismaModule,
+            users_module_1.UsersModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [
