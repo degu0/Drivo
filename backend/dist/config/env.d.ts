@@ -4,7 +4,7 @@ export declare const envSchema: z.ZodObject<{
     JWT_SECRET: z.ZodString;
     JWT_EXPIRES_IN: z.ZodDefault<z.ZodString>;
     PORT: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
-    CORS_ORIGIN: z.ZodDefault<z.ZodString>;
+    CORS_ORIGIN: z.ZodDefault<z.ZodURL>;
 }, z.core.$strip>;
 export type Env = z.infer<typeof envSchema>;
 export declare function validateEnv(config: Record<string, unknown>): Env;

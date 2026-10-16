@@ -13,6 +13,8 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const env_1 = require("./config/env");
 const prisma_module_1 = require("./prisma/prisma.module");
+const core_1 = require("@nestjs/core");
+const nestjs_zod_1 = require("nestjs-zod");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -27,7 +29,13 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [
+            app_service_1.AppService,
+            {
+                provide: core_1.APP_PIPE,
+                useClass: nestjs_zod_1.ZodValidationPipe,
+            },
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

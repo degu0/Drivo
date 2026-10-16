@@ -8,7 +8,7 @@ exports.envSchema = zod_1.z.object({
     JWT_SECRET: zod_1.z.string().min(32),
     JWT_EXPIRES_IN: zod_1.z.string().default('1d'),
     PORT: zod_1.z.coerce.number().int().positive().default(3333),
-    CORS_ORIGIN: zod_1.z.string().default('http://localhost:3000'),
+    CORS_ORIGIN: zod_1.z.url().default('http://localhost:3000'),
 });
 function validateEnv(config) {
     const result = exports.envSchema.safeParse(config);
