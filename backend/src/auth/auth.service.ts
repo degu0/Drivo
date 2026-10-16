@@ -2,10 +2,8 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { RegisterDto } from './dto/register.dto';
-import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login';
-
-const SALT_ROUNDS = 10;
+import { comparePassword, hashPassword } from './password';
 
 type AuthUser = {
   id: string;
@@ -27,7 +25,7 @@ export class AuthService {
       throw new ConflictException('User with this email already exists');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    const passwordHash = await hashPassword(dto.password);
 
     const user = await this.usersService.create({
       name: dto.name,
@@ -42,7 +40,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email);
 
     const passwordMatches =
-      user && (await bcrypt.compare(dto.password, user.passwordHash));
+      user && (await comparePassword(dto.password, user.passwordHash));
 
     if (!user || !passwordMatches) {
       throw new ConflictException('Invalid email or password');

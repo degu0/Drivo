@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
+const password_1 = require("../auth/password");
 const prisma_service_1 = require("../prisma/prisma.service");
 let UsersService = class UsersService {
     prisma;
@@ -20,19 +21,35 @@ let UsersService = class UsersService {
     create(data) {
         return this.prisma.user.create({
             data,
-            omit: { passwordHash: true }
+            omit: { passwordHash: true },
         });
     }
     findByEmail(email) {
         return this.prisma.user.findUnique({
-            where: { email }
+            where: { email },
         });
     }
     findById(id) {
         return this.prisma.user.findUnique({
             where: { id },
-            omit: { passwordHash: true }
+            omit: { passwordHash: true },
         });
+    }
+    async updateCurrent(id, data) {
+        return await this.prisma.user.update({
+            where: { id },
+            data,
+            omit: { passwordHash: true },
+        });
+    }
+    async updatePassword(id, password) {
+        const passwordHash = await (0, password_1.hashPassword)(password);
+        await this.prisma.user.update({
+            where: { id },
+            data: { passwordHash },
+            select: { id: true },
+        });
+        return true;
     }
 };
 exports.UsersService = UsersService;

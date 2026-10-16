@@ -4,6 +4,10 @@ export interface CreateUserData {
     email: string;
     passwordHash: string;
 }
+export interface UpdateUserData {
+    name?: string;
+    email?: string;
+}
 export declare class UsersService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -35,4 +39,12 @@ export declare class UsersService {
     } | null, null, import("@prisma/client/runtime/client").DefaultArgs, {
         omit: import("../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
     }>;
+    updateCurrent(id: string, data: UpdateUserData): Promise<{
+        id: string;
+        name: string;
+        email: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    updatePassword(id: string, password: string): Promise<boolean>;
 }
