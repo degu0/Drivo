@@ -1,3 +1,6 @@
+import { config } from 'dotenv';
+config({ path: ['.env', '../.env'], quiet: true });
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
