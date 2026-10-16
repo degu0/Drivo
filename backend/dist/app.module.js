@@ -16,6 +16,7 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const core_1 = require("@nestjs/core");
 const nestjs_zod_1 = require("nestjs-zod");
 const users_module_1 = require("./users/users.module");
+const auth_module_1 = require("./auth/auth.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -29,6 +30,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             prisma_module_1.PrismaModule,
             users_module_1.UsersModule,
+            auth_module_1.AuthModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [
