@@ -5,7 +5,7 @@ export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
     register(dto: RegisterDto): Promise<{
-        accessToken: Promise<string>;
+        accessToken: string;
         user: {
             id: string;
             name: string;
@@ -13,7 +13,7 @@ export declare class AuthController {
         };
     }>;
     login(dto: LoginDto): Promise<{
-        accessToken: Promise<string>;
+        accessToken: string;
         user: {
             id: string;
             name: string;

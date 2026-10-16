@@ -7,7 +7,7 @@ export declare class AuthService {
     private readonly jwtService;
     constructor(usersService: UsersService, jwtService: JwtService);
     register(dto: RegisterDto): Promise<{
-        accessToken: Promise<string>;
+        accessToken: string;
         user: {
             id: string;
             name: string;
@@ -15,7 +15,7 @@ export declare class AuthService {
         };
     }>;
     login(dto: LoginDto): Promise<{
-        accessToken: Promise<string>;
+        accessToken: string;
         user: {
             id: string;
             name: string;
