@@ -1,10 +1,12 @@
-import { Suspense } from 'react';
-import { logout } from '@/features/auth/actions';
-import { getCurrentUser } from '@/lib/auth';
+import { Suspense } from "react";
+import { logout } from "@/features/auth/actions";
+import { getCurrentUser } from "@/lib/auth";
+import { Header } from "@/components/header/Header";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6">
+      <Header />
       <h1 className="text-2xl font-semibold">Drivo</h1>
       <Suspense
         fallback={<p className="text-body text-label-secondary">Carregando…</p>}
