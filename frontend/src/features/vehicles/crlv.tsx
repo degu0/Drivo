@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { scanCrlv } from "./actions";
 import type { CrlvData } from "./schemas";
-import { secondaryButtonClass } from "./styles";
 
 const MAX_CRLV_SIZE = 5 * 1024 * 1024;
 const ACCEPT = ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png";
@@ -25,7 +26,6 @@ function useCrlvScan(onData: (data: CrlvData) => void) {
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selected = event.target.files?.[0];
-    // Limpa o input para permitir escolher o mesmo arquivo de novo.
     event.target.value = "";
     if (!selected) return;
 
@@ -91,17 +91,21 @@ export function CrlvImportCard({ onData }: { onData: (data: CrlvData) => void })
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-surface-2 px-4 py-3">
+      <div
+        aria-live="polite"
+        aria-busy={isPending}
+        className="flex items-center gap-3 rounded-xl bg-surface-2 px-4 py-3"
+      >
         {reading ? (
           <>
             <FileIcon className="text-label-tertiary" />
             <div className="flex min-w-0 flex-1 flex-col">
               <p className="truncate text-callout text-label">{reading.name}</p>
               <p className="text-footnote text-label-tertiary">
-                {formatSize(reading.size)} · lendo…
+                {formatSize(reading.size)} · lendo… pode levar alguns segundos
               </p>
             </div>
-            <Spinner />
+            <Spinner className="size-5 text-label-tertiary" />
           </>
         ) : file ? (
           <>
@@ -136,18 +140,15 @@ export function CrlvImportCard({ onData }: { onData: (data: CrlvData) => void })
       )}
 
       {input}
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        className="w-full"
         onClick={open}
-        disabled={isPending}
-        className={secondaryButtonClass}
+        loading={isPending}
+        loadingText="Lendo CRLV…"
       >
-        {isPending
-          ? "Lendo CRLV…"
-          : file
-            ? "Importar outro CRLV"
-            : "Escolher arquivo"}
-      </button>
+        {file ? "Importar outro CRLV" : "Escolher arquivo"}
+      </Button>
     </div>
   );
 }
@@ -197,14 +198,15 @@ export function VehicleRecordCard({
       )}
 
       {input}
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        className="w-full"
         onClick={open}
-        disabled={isPending}
-        className={secondaryButtonClass}
+        loading={isPending}
+        loadingText="Lendo CRLV…"
       >
-        {isPending ? "Lendo CRLV…" : "Atualizar com novo CRLV"}
-      </button>
+        Atualizar com novo CRLV
+      </Button>
     </div>
   );
 }
@@ -258,22 +260,6 @@ function CheckIcon() {
     >
       <circle cx="12" cy="12" r="9" />
       <path d="m8 12 3 3 5-6" />
-    </svg>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-label="Lendo arquivo"
-      className="size-5 shrink-0 animate-spin text-label-tertiary"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.5}
-      strokeLinecap="round"
-    >
-      <path d="M12 3a9 9 0 1 0 9 9" />
     </svg>
   );
 }

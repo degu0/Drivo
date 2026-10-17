@@ -3,9 +3,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { updateProfile, type ProfileActionResult } from "./actions";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { FormMessage } from "@/components/ui/form-message";
+import type { ActionResult } from "@/lib/action-result";
+import { applyFieldErrors } from "@/lib/form-errors";
+import { updateProfile } from "./actions";
 import { profileSchema, type ProfileInput } from "./schemas";
-import { cardClass, cardFooterClass, inputClass, labelClass } from "./styles";
+import { cardClass, cardFooterClass, inputClass } from "./styles";
 
 type ProfileFormProps = {
   name: string;
@@ -18,12 +23,13 @@ function splitName(name: string) {
 }
 
 export function ProfileForm({ name, email }: ProfileFormProps) {
-  const [result, setResult] = useState<ProfileActionResult>();
+  const [result, setResult] = useState<ActionResult>();
   const [isPending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isDirty },
   } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
@@ -33,7 +39,9 @@ export function ProfileForm({ name, email }: ProfileFormProps) {
   const onSubmit = handleSubmit((data) => {
     setResult(undefined);
     startTransition(async () => {
-      setResult(await updateProfile(data));
+      const response = await updateProfile(data);
+      applyFieldErrors(response, setError);
+      setResult(response);
     });
   });
 
@@ -41,95 +49,58 @@ export function ProfileForm({ name, email }: ProfileFormProps) {
     <form onSubmit={onSubmit} noValidate className={cardClass}>
       <div className="flex flex-col gap-5 p-6">
         <div className="grid gap-5 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="firstName" className={labelClass}>
-              Nome
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              autoComplete="given-name"
-              aria-invalid={!!errors.firstName}
-              className={inputClass}
-              {...register("firstName")}
-            />
-            {errors.firstName && (
-              <p className="text-callout text-danger">
-                {errors.firstName.message}
-              </p>
+          <FormField id="firstName" label="Nome" error={errors.firstName?.message}>
+            {(field) => (
+              <input
+                {...field}
+                type="text"
+                autoComplete="given-name"
+                className={inputClass}
+                {...register("firstName")}
+              />
             )}
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="lastName" className={labelClass}>
-              Sobrenome
-            </label>
+          <FormField id="lastName" label="Sobrenome" error={errors.lastName?.message}>
+            {(field) => (
+              <input
+                {...field}
+                type="text"
+                autoComplete="family-name"
+                className={inputClass}
+                {...register("lastName")}
+              />
+            )}
+          </FormField>
+        </div>
+
+        <FormField id="email" label="E-mail" error={errors.email?.message}>
+          {(field) => (
             <input
-              id="lastName"
-              type="text"
-              autoComplete="family-name"
-              aria-invalid={!!errors.lastName}
+              {...field}
+              type="email"
+              autoComplete="email"
               className={inputClass}
-              {...register("lastName")}
+              {...register("email")}
             />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className={labelClass}>
-            E-mail
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            aria-invalid={!!errors.email}
-            className={inputClass}
-            {...register("email")}
-          />
-          {errors.email && (
-            <p className="text-callout text-danger">{errors.email.message}</p>
           )}
-        </div>
+        </FormField>
       </div>
 
       <div className={cardFooterClass}>
-        <FooterMessage
+        <FormMessage
           result={result}
           fallback="Alterações salvas ficam visíveis na hora."
         />
-        <button
+        <Button
           type="submit"
-          disabled={isPending || !isDirty}
-          className="h-11 shrink-0 cursor-pointer rounded-xl bg-accent px-5 text-body font-semibold text-white transition hover:bg-accent-hover active:bg-accent-pressed disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={!isDirty}
+          loading={isPending}
+          loadingText="Salvando…"
         >
-          {isPending ? "Salvando…" : "Salvar"}
-        </button>
+          Salvar
+        </Button>
       </div>
     </form>
   );
-}
-
-export function FooterMessage({
-  result,
-  fallback,
-}: {
-  result?: ProfileActionResult;
-  fallback: string;
-}) {
-  if (result && "error" in result) {
-    return (
-      <p role="alert" className="text-callout text-danger">
-        {result.error}
-      </p>
-    );
-  }
-  if (result && "success" in result) {
-    return (
-      <p role="status" className="text-callout text-success">
-        {result.success}
-      </p>
-    );
-  }
-  return <p className="text-callout text-label-tertiary">{fallback}</p>;
 }

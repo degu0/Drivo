@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SearchIcon } from "@/components/ui/icons";
 import type { Vehicle } from "./api";
 import { AddVehicle } from "./addVehicle";
 import { VehicleCard } from "./vehicle-card";
 
-// Ignora caixa, acentos e pontuação, para "abc-1d23" achar "ABC1D23".
 function normalize(value: string) {
   return value
     .normalize("NFD")
@@ -75,9 +77,17 @@ export function Garage({
       </div>
 
       {query && filtered.length === 0 ? (
-        <p className="py-16 text-center text-body text-label-secondary">
-          Nenhum veículo encontrado para “{search.trim()}”.
-        </p>
+        <EmptyState
+          size="inline"
+          icon={<SearchIcon />}
+          title={`Nenhum veículo encontrado para “${search.trim()}”`}
+          description="Confira a placa ou o modelo digitado."
+          action={
+            <Button variant="secondary" size="sm" onClick={() => setSearch("")}>
+              Limpar busca
+            </Button>
+          }
+        />
       ) : (
         <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {filtered.map((vehicle) => (

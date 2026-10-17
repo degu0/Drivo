@@ -1,7 +1,9 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { ApiError, apiFetch } from '@/lib/api';
+import type { ActionError } from '@/lib/action-result';
+import { apiFetch } from '@/lib/api';
+import { toActionError } from '@/lib/api-error';
 import { createSession, deleteSession } from '@/lib/session';
 import {
   loginSchema,
@@ -14,9 +16,11 @@ type AuthResponse = {
   accessToken: string;
 };
 
-export type LoginResult = { error: string } | undefined;
+const INVALID_CREDENTIALS = 'E-mail ou senha incorretos';
 
-export async function login(input: LoginInput): Promise<LoginResult> {
+export async function login(
+  input: LoginInput,
+): Promise<ActionError | undefined> {
   const parsed = loginSchema.safeParse(input);
   if (!parsed.success) {
     return { error: 'Dados de login inválidos' };
@@ -29,18 +33,23 @@ export async function login(input: LoginInput): Promise<LoginResult> {
     });
     await createSession(accessToken);
   } catch (error) {
-    if (error instanceof ApiError && error.status < 500) {
-      return { error: 'E-mail ou senha incorretos' };
-    }
-    return { error: 'Não foi possível entrar agora. Tente novamente.' };
+    const { error: message } = toActionError(error, {
+      messages: {
+        400: INVALID_CREDENTIALS,
+        401: INVALID_CREDENTIALS,
+        404: INVALID_CREDENTIALS,
+        409: INVALID_CREDENTIALS,
+      },
+    });
+    return { error: message };
   }
 
   redirect('/');
 }
 
-export type RegisterResult = { error: string } | undefined;
-
-export async function register(input: RegisterInput): Promise<RegisterResult> {
+export async function register(
+  input: RegisterInput,
+): Promise<ActionError | undefined> {
   const parsed = registerSchema.safeParse(input);
   if (!parsed.success) {
     return { error: 'Dados de cadastro inválidos' };
@@ -55,13 +64,11 @@ export async function register(input: RegisterInput): Promise<RegisterResult> {
     });
     await createSession(accessToken);
   } catch (error) {
-    if (error instanceof ApiError && error.status === 409) {
-      return { error: 'Já existe uma conta com este e-mail' };
-    }
-    if (error instanceof ApiError && error.status < 500) {
-      return { error: 'Dados de cadastro inválidos' };
-    }
-    return { error: 'Não foi possível criar sua conta agora. Tente novamente.' };
+    return toActionError(error, {
+      messages: {
+        409: { field: 'email', message: 'Já existe uma conta com este e-mail' },
+      },
+    });
   }
 
   redirect('/');

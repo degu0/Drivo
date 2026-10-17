@@ -1,7 +1,7 @@
 import 'server-only';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, unstable_rethrow } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
-import { getSessionToken } from '@/lib/session';
+import { requireSessionToken } from '@/lib/session';
 
 export type FuelType =
   | 'GASOLINA'
@@ -41,35 +41,19 @@ export type Vehicle = {
 export async function getVehicles(): Promise<Vehicle[]> {
   'use cache: private';
 
-  const token = await getSessionToken();
-  if (!token) {
-    redirect('/login');
-  }
-
-  try {
-    return await apiFetch<Vehicle[]>('/vehicles', { token });
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      redirect('/login');
-    }
-    throw error;
-  }
+  const token = await requireSessionToken();
+  return apiFetch<Vehicle[]>('/vehicles', { token });
 }
 
 export async function getVehicle(id: string): Promise<Vehicle> {
   'use cache: private';
 
-  const token = await getSessionToken();
-  if (!token) {
-    redirect('/login');
-  }
+  const token = await requireSessionToken();
 
   try {
     return await apiFetch<Vehicle>(`/vehicles/${id}`, { token });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      redirect('/login');
-    }
+    unstable_rethrow(error);
     if (
       error instanceof ApiError &&
       (error.status === 400 || error.status === 404)

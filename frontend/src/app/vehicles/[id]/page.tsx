@@ -4,6 +4,7 @@ import { getVehicle } from "@/features/vehicles/api";
 import { formatPlate } from "@/features/vehicles/labels";
 import { toVehicleInput } from "@/features/vehicles/schemas";
 import { VehicleForm } from "@/features/vehicles/vehicle-form";
+import { VehicleDetailsSkeleton } from "@/features/vehicles/skeletons";
 import { PageHeading } from "../page-heading";
 
 const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -17,11 +18,7 @@ export default function VehiclePage({ params }: PageProps<"/vehicles/[id]">) {
     <main className="min-h-screen">
       <Header />
       <Suspense
-        fallback={
-          <p className="pt-40 text-center text-body text-label-secondary">
-            Carregando…
-          </p>
-        }
+        fallback={<VehicleDetailsSkeleton />}
       >
         <VehicleDetails params={params} />
       </Suspense>

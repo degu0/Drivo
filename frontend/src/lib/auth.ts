@@ -1,7 +1,7 @@
 import 'server-only';
-import { redirect } from 'next/navigation';
-import { apiFetch } from '@/lib/api';
-import { getSessionToken } from '@/lib/session';
+import { redirect, unstable_rethrow } from 'next/navigation';
+import { ApiError, apiFetch } from '@/lib/api';
+import { requireSessionToken, SESSION_EXPIRED_URL } from '@/lib/session';
 
 export type User = {
   id: string;
@@ -13,10 +13,7 @@ export type User = {
 export async function getCurrentUser(): Promise<User> {
   'use cache: private';
 
-  const token = await getSessionToken();
-  if (!token) {
-    redirect('/login');
-  }
+  const token = await requireSessionToken();
 
   try {
     const user = await apiFetch<User>('/users/me', { token });
@@ -26,7 +23,11 @@ export async function getCurrentUser(): Promise<User> {
       email: user.email,
       createdAt: user.createdAt,
     };
-  } catch {
-    redirect('/login');
+  } catch (error) {
+    unstable_rethrow(error);
+    if (error instanceof ApiError && error.status === 404) {
+      redirect(SESSION_EXPIRED_URL);
+    }
+    throw error;
   }
 }

@@ -3,6 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { applyFieldErrors } from "@/lib/form-errors";
 import { register as registerUser } from "./actions";
 import { registerSchema, type RegisterInput } from "./schemas";
 import Image from "next/image";
@@ -20,6 +24,7 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -30,7 +35,9 @@ export function RegisterForm() {
     setServerError(undefined);
     startTransition(async () => {
       const result = await registerUser(data);
-      if (result?.error) setServerError(result.error);
+      if (!result) return;
+      applyFieldErrors(result, setError);
+      setServerError(result.error);
     });
   });
 
@@ -45,104 +52,77 @@ export function RegisterForm() {
         <div className="flex flex-col items-center gap-2 text-center">
           <h2 className="text-title-1 text-label">Criar sua conta</h2>
           <p className="text-body text-label-secondary">
-            Leva menos de um minuto. Depois eh so adicionar seus viculos
+            Leva menos de um minuto. Depois é só adicionar seus veículos.
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-callout text-label-secondary">
-          Nome completo
-        </label>
-        <input
-          id="name"
-          type="text"
-          autoComplete="name"
-          placeholder="Seu nome"
-          aria-invalid={!!errors.name}
-          className={inputClass}
-          {...register("name")}
-        />
-        {errors.name && (
-          <p className="text-footnote text-danger">{errors.name.message}</p>
+      <FormField id="name" label="Nome completo" error={errors.name?.message}>
+        {(field) => (
+          <input
+            {...field}
+            type="text"
+            autoComplete="name"
+            placeholder="Seu nome"
+            className={inputClass}
+            {...register("name")}
+          />
         )}
-      </div>
+      </FormField>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-callout text-label-secondary">
-          E-mail
-        </label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder="Email"
-          aria-invalid={!!errors.email}
-          className={inputClass}
-          {...register("email")}
-        />
-        {errors.email && (
-          <p className="text-footnote text-danger">{errors.email.message}</p>
+      <FormField id="email" label="E-mail" error={errors.email?.message}>
+        {(field) => (
+          <input
+            {...field}
+            type="email"
+            autoComplete="email"
+            placeholder="Email"
+            className={inputClass}
+            {...register("email")}
+          />
         )}
-      </div>
+      </FormField>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-callout text-label-secondary">
-          Senha
-        </label>
-        <input
-          id="password"
-          type="password"
-          placeholder="Senha"
-          autoComplete="new-password"
-          aria-invalid={!!errors.password}
-          className={inputClass}
-          {...register("password")}
-        />
-        {errors.password && (
-          <p className="text-footnote text-danger">{errors.password.message}</p>
+      <FormField id="password" label="Senha" error={errors.password?.message}>
+        {(field) => (
+          <input
+            {...field}
+            type="password"
+            placeholder="Senha"
+            autoComplete="new-password"
+            className={inputClass}
+            {...register("password")}
+          />
         )}
-      </div>
+      </FormField>
 
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="confirmPassword"
-          className="text-callout text-label-secondary"
-        >
-          Confirmação de senha
-        </label>
-        <input
-          id="confirmPassword"
-          type="password"
-          placeholder="Confirme a sua senha"
-          autoComplete="new-password"
-          aria-invalid={!!errors.confirmPassword}
-          className={inputClass}
-          {...register("confirmPassword")}
-        />
-        {errors.confirmPassword && (
-          <p className="text-footnote text-danger">
-            {errors.confirmPassword.message}
-          </p>
-        )}
-      </div>
-
-      {serverError && (
-        <p
-          role="alert"
-          className="rounded-xl bg-danger/10 px-4 py-3 text-callout text-danger"
-        >
-          {serverError}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className="h-14 rounded-xl bg-accent text-headline text-white transition hover:bg-accent-hover active:bg-accent-pressed disabled:opacity-60 cursor-pointer"
+      <FormField
+        id="confirmPassword"
+        label="Confirmação de senha"
+        error={errors.confirmPassword?.message}
       >
-        {isPending ? "Criando conta…" : "Criar conta"}
-      </button>
+        {(field) => (
+          <input
+            {...field}
+            type="password"
+            placeholder="Confirme a sua senha"
+            autoComplete="new-password"
+            className={inputClass}
+            {...register("confirmPassword")}
+          />
+        )}
+      </FormField>
+
+      {serverError && <Alert>{serverError}</Alert>}
+
+      <Button
+        type="submit"
+        size="lg"
+        loading={isPending}
+        loadingText="Criando conta…"
+      >
+        Criar conta
+      </Button>
 
       <footer className="text-center lg:absolute lg:inset-x-0 lg:bottom-8">
         <p className="text-body text-label-secondary">

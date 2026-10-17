@@ -1,13 +1,11 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { WarningIcon } from "@/components/ui/icons";
 import { deleteVehicle } from "./actions";
 import { formatPlate } from "./labels";
-import {
-  dangerButtonClass,
-  secondaryButtonClass,
-  sectionCardClass,
-} from "./styles";
+import { sectionCardClass } from "./styles";
 
 export function DeleteVehicleCard({
   vehicleId,
@@ -49,13 +47,9 @@ export function DeleteVehicleCard({
         </p>
       </div>
 
-      <button
-        type="button"
-        onClick={openDialog}
-        className={`${dangerButtonClass} w-full`}
-      >
+      <Button variant="danger" className="w-full" onClick={openDialog}>
         Excluir veículo
-      </button>
+      </Button>
 
       <dialog
         ref={dialogRef}
@@ -94,45 +88,25 @@ export function DeleteVehicleCard({
           )}
 
           <div className="grid w-full grid-cols-2 gap-3">
-            <button
-              type="button"
-              // Foco inicial no botão seguro, não no destrutivo.
+            <Button
+              variant="secondary"
               autoFocus
               onClick={closeDialog}
               disabled={isPending}
-              className={secondaryButtonClass}
             >
               Cancelar
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="danger"
               onClick={onDelete}
-              disabled={isPending}
-              className={`${dangerButtonClass} w-full`}
+              loading={isPending}
+              loadingText="Excluindo…"
             >
-              {isPending ? "Excluindo…" : "Excluir"}
-            </button>
+              Excluir
+            </Button>
           </div>
         </div>
       </dialog>
     </div>
-  );
-}
-
-function WarningIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden
-      className="size-6"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
-      <path d="M12 9v4M12 17h.01" />
-    </svg>
   );
 }

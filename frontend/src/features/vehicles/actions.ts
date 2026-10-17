@@ -2,45 +2,30 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import type { ActionError, ActionResult } from '@/lib/action-result';
 import { ApiError, apiFetch } from '@/lib/api';
-import { getSessionToken } from '@/lib/session';
+import { toActionError } from '@/lib/api-error';
+import { requireSessionToken } from '@/lib/session';
 import type { Vehicle } from './api';
 import { vehicleSchema, type CrlvData, type VehicleInput } from './schemas';
 
-export type VehicleActionResult = { error: string } | { success: string };
-export type CrlvScanResult = { error: string } | { data: CrlvData };
+export type CrlvScanResult = ActionError | { data: CrlvData };
 
-async function requireToken() {
-  const token = await getSessionToken();
-  if (!token) {
-    redirect('/login');
-  }
-  return token;
-}
-
-function saveErrorMessage(error: unknown) {
-  if (error instanceof ApiError && error.status === 401) {
-    redirect('/login');
-  }
-  if (error instanceof ApiError && error.status === 409) {
-    return 'Já existe um veículo com esta placa, chassi ou Renavam';
-  }
-  if (error instanceof ApiError && error.status < 500) {
-    return 'Dados inválidos';
-  }
-  return 'Não foi possível salvar agora. Tente novamente.';
-}
+const VEHICLE_MESSAGES = {
+  409: 'Já existe um veículo com esta placa, chassi ou Renavam',
+  404: 'Este veículo não existe mais. Ele pode ter sido excluído.',
+};
 
 export async function createVehicle(
   input: VehicleInput,
-): Promise<VehicleActionResult> {
+): Promise<ActionResult> {
   const parsed = vehicleSchema.safeParse(input);
   if (!parsed.success) {
     return { error: 'Dados inválidos' };
   }
 
   const { nickname, ...data } = parsed.data;
-  const token = await requireToken();
+  const token = await requireSessionToken();
 
   try {
     await apiFetch<Vehicle>('/vehicles', {
@@ -49,7 +34,7 @@ export async function createVehicle(
       body: { ...data, ...(nickname && { nickname }) },
     });
   } catch (error) {
-    return { error: saveErrorMessage(error) };
+    return toActionError(error, { messages: VEHICLE_MESSAGES });
   }
 
   revalidatePath('/', 'layout');
@@ -59,13 +44,13 @@ export async function createVehicle(
 export async function updateVehicle(
   id: string,
   input: VehicleInput,
-): Promise<VehicleActionResult> {
+): Promise<ActionResult> {
   const parsed = vehicleSchema.safeParse(input);
   if (!parsed.success) {
     return { error: 'Dados inválidos' };
   }
 
-  const token = await requireToken();
+  const token = await requireSessionToken();
 
   try {
     await apiFetch<Vehicle>(`/vehicles/${id}`, {
@@ -74,28 +59,23 @@ export async function updateVehicle(
       body: parsed.data,
     });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 404) {
-      redirect('/');
-    }
-    return { error: saveErrorMessage(error) };
+    return toActionError(error, { messages: VEHICLE_MESSAGES });
   }
 
   revalidatePath('/', 'layout');
   return { success: 'Alterações salvas' };
 }
 
-export async function deleteVehicle(id: string): Promise<{ error: string }> {
-  const token = await requireToken();
+export async function deleteVehicle(id: string): Promise<ActionError> {
+  const token = await requireSessionToken();
 
   try {
     await apiFetch(`/vehicles/${id}`, { method: 'DELETE', token });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      redirect('/login');
-    }
-    // 404: já foi excluído; segue para a garagem.
     if (!(error instanceof ApiError && error.status === 404)) {
-      return { error: 'Não foi possível excluir agora. Tente novamente.' };
+      return toActionError(error, {
+        messages: { 500: 'Não foi possível excluir agora. Tente novamente.' },
+      });
     }
   }
 
@@ -109,7 +89,7 @@ export async function scanCrlv(formData: FormData): Promise<CrlvScanResult> {
     return { error: 'Selecione um arquivo' };
   }
 
-  const token = await requireToken();
+  const token = await requireSessionToken();
   const body = new FormData();
   body.append('file', file);
 
@@ -121,18 +101,14 @@ export async function scanCrlv(formData: FormData): Promise<CrlvScanResult> {
     });
     return { data };
   } catch (error) {
-    if (error instanceof ApiError) {
-      switch (error.status) {
-        case 401:
-          redirect('/login');
-        case 400:
-          return { error: 'Envie um PDF, JPG ou PNG de até 5 MB' };
-        case 422:
-          return { error: 'Este arquivo não parece ser um CRLV' };
-        case 429:
-          return { error: 'Limite de leituras atingido. Tente mais tarde.' };
-      }
-    }
-    return { error: 'Não foi possível ler o CRLV agora. Tente novamente.' };
+    const { error: message } = toActionError(error, {
+      messages: {
+        400: 'Envie um PDF, JPG ou PNG de até 5 MB.',
+        422: 'Este arquivo não parece ser um CRLV. Envie uma foto nítida ou o PDF do documento.',
+        429: 'O limite de leituras foi atingido. Tente mais tarde ou preencha manualmente.',
+        502: 'O serviço de leitura está indisponível. Tente mais tarde ou preencha manualmente.',
+      },
+    });
+    return { error: message };
   }
 }

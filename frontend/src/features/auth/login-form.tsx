@@ -1,10 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
 import { login } from "./actions";
 import { loginSchema, type LoginInput } from "./schemas";
+import { SessionExpiredNotice } from "./session-expired-notice";
 import Image from "next/image";
 
 import iconCar from "../../../public/images/icons/car.png";
@@ -49,58 +53,41 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-callout text-label-secondary">
-          E-mail
-        </label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder="Email"
-          aria-invalid={!!errors.email}
-          className={inputClass}
-          {...register("email")}
-        />
-        {errors.email && (
-          <p className="text-footnote text-danger">{errors.email.message}</p>
+      <Suspense fallback={null}>
+        <SessionExpiredNotice />
+      </Suspense>
+
+      <FormField id="email" label="E-mail" error={errors.email?.message}>
+        {(field) => (
+          <input
+            {...field}
+            type="email"
+            autoComplete="email"
+            placeholder="Email"
+            className={inputClass}
+            {...register("email")}
+          />
         )}
-      </div>
+      </FormField>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-callout text-label-secondary">
-          Senha
-        </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          placeholder="Senha"
-          aria-invalid={!!errors.password}
-          className={inputClass}
-          {...register("password")}
-        />
-        {errors.password && (
-          <p className="text-footnote text-danger">{errors.password.message}</p>
+      <FormField id="password" label="Senha" error={errors.password?.message}>
+        {(field) => (
+          <input
+            {...field}
+            type="password"
+            autoComplete="current-password"
+            placeholder="Senha"
+            className={inputClass}
+            {...register("password")}
+          />
         )}
-      </div>
+      </FormField>
 
-      {serverError && (
-        <p
-          role="alert"
-          className="rounded-xl bg-danger/10 px-4 py-3 text-callout text-danger"
-        >
-          {serverError}
-        </p>
-      )}
+      {serverError && <Alert>{serverError}</Alert>}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="h-14 rounded-xl bg-accent text-headline text-white transition hover:bg-accent-hover active:bg-accent-pressed disabled:opacity-60 cursor-pointer"
-      >
-        {isPending ? "Entrando…" : "Entrar"}
-      </button>
+      <Button type="submit" size="lg" loading={isPending} loadingText="Entrando…">
+        Entrar
+      </Button>
 
       <footer className="text-center lg:absolute lg:inset-x-0 lg:bottom-8">
         <p className="text-body text-label-secondary">

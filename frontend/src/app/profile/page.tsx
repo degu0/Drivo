@@ -4,6 +4,7 @@ import { UserAvatar } from "@/components/header/UserAvatar";
 import { logout } from "@/features/auth/actions";
 import { PasswordForm } from "@/features/profile/password-form";
 import { ProfileForm } from "@/features/profile/profile-form";
+import { ProfileSkeleton } from "@/features/profile/profile-skeleton";
 import { cardClass } from "@/features/profile/styles";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -18,11 +19,7 @@ export default function ProfilePage() {
     <main className="min-h-screen">
       <Header />
       <Suspense
-        fallback={
-          <p className="pt-40 text-center text-body text-label-secondary">
-            Carregando…
-          </p>
-        }
+        fallback={<ProfileSkeleton />}
       >
         <ProfileContent />
       </Suspense>

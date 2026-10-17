@@ -1,7 +1,10 @@
 import 'server-only';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export const SESSION_COOKIE = 'drivo_session';
+
+export const SESSION_EXPIRED_URL = '/login?expired=1';
 
 export function getTokenExpiration(token: string): Date | undefined {
   try {
@@ -18,6 +21,14 @@ export function getTokenExpiration(token: string): Date | undefined {
 
 export async function getSessionToken() {
   return (await cookies()).get(SESSION_COOKIE)?.value;
+}
+
+export async function requireSessionToken() {
+  const token = await getSessionToken();
+  if (!token) {
+    redirect('/login');
+  }
+  return token;
 }
 
 export async function createSession(token: string) {

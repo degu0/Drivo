@@ -3,19 +3,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { updatePassword, type ProfileActionResult } from "./actions";
-import { FooterMessage } from "./profile-form";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { FormMessage } from "@/components/ui/form-message";
+import type { ActionResult } from "@/lib/action-result";
+import { applyFieldErrors } from "@/lib/form-errors";
+import { updatePassword } from "./actions";
 import { passwordSchema, type PasswordInput } from "./schemas";
-import { cardClass, cardFooterClass, inputClass, labelClass } from "./styles";
+import { cardClass, cardFooterClass, inputClass } from "./styles";
 
 export function PasswordForm() {
-  const [result, setResult] = useState<ProfileActionResult>();
+  const [result, setResult] = useState<ActionResult>();
   const [isPending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<PasswordInput>({
     resolver: zodResolver(passwordSchema),
@@ -26,6 +31,7 @@ export function PasswordForm() {
     setResult(undefined);
     startTransition(async () => {
       const response = await updatePassword(data);
+      applyFieldErrors(response, setError);
       setResult(response);
       if ("success" in response) reset();
     });
@@ -34,80 +40,65 @@ export function PasswordForm() {
   return (
     <form onSubmit={onSubmit} noValidate className={cardClass}>
       <div className="flex flex-col gap-5 p-6">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="currentPassword" className={labelClass}>
-            Senha atual
-          </label>
-          <input
-            id="currentPassword"
-            type="password"
-            autoComplete="current-password"
-            aria-invalid={!!errors.currentPassword}
-            className={inputClass}
-            {...register("currentPassword")}
-          />
-          {errors.currentPassword && (
-            <p className="text-callout text-danger">
-              {errors.currentPassword.message}
-            </p>
+        <FormField
+          id="currentPassword"
+          label="Senha atual"
+          error={errors.currentPassword?.message}
+        >
+          {(field) => (
+            <input
+              {...field}
+              type="password"
+              autoComplete="current-password"
+              className={inputClass}
+              {...register("currentPassword")}
+            />
           )}
-        </div>
+        </FormField>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className={labelClass}>
-              Nova senha
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              placeholder="Mínimo de 8 caracteres"
-              aria-invalid={!!errors.password}
-              className={inputClass}
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="text-callout text-danger">
-                {errors.password.message}
-              </p>
+          <FormField id="password" label="Nova senha" error={errors.password?.message}>
+            {(field) => (
+              <input
+                {...field}
+                type="password"
+                autoComplete="new-password"
+                placeholder="Mínimo de 8 caracteres"
+                className={inputClass}
+                {...register("password")}
+              />
             )}
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="confirmPassword" className={labelClass}>
-              Confirmar nova senha
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              placeholder="Repita a nova senha"
-              aria-invalid={!!errors.confirmPassword}
-              className={inputClass}
-              {...register("confirmPassword")}
-            />
-            {errors.confirmPassword && (
-              <p className="text-callout text-danger">
-                {errors.confirmPassword.message}
-              </p>
+          <FormField
+            id="confirmPassword"
+            label="Confirmar nova senha"
+            error={errors.confirmPassword?.message}
+          >
+            {(field) => (
+              <input
+                {...field}
+                type="password"
+                autoComplete="new-password"
+                placeholder="Repita a nova senha"
+                className={inputClass}
+                {...register("confirmPassword")}
+              />
             )}
-          </div>
+          </FormField>
         </div>
       </div>
 
       <div className={cardFooterClass}>
-        <FooterMessage
-          result={result}
-          fallback="Altere sua senha com segurança"
-        />
-        <button
+        <FormMessage result={result} fallback="Altere sua senha com segurança" />
+        <Button
           type="submit"
-          disabled={isPending}
-          className="h-11 shrink-0 cursor-pointer rounded-xl bg-surface-3 px-5 text-body font-semibold text-label transition hover:bg-surface-4 disabled:cursor-not-allowed disabled:opacity-60"
+          variant="tertiary"
+          loading={isPending}
+          loadingText="Alterando…"
         >
-          {isPending ? "Alterando…" : "Alterar senha"}
-        </button>
+          Alterar senha
+        </Button>
       </div>
     </form>
   );

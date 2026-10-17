@@ -1,9 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { ApiError, apiFetch } from '@/lib/api';
-import { getSessionToken } from '@/lib/session';
+import type { ActionResult } from '@/lib/action-result';
+import { apiFetch } from '@/lib/api';
+import { toActionError } from '@/lib/api-error';
+import { requireSessionToken } from '@/lib/session';
 import {
   passwordSchema,
   profileSchema,
@@ -11,26 +12,16 @@ import {
   type ProfileInput,
 } from './schemas';
 
-export type ProfileActionResult = { error: string } | { success: string };
-
-async function requireToken() {
-  const token = await getSessionToken();
-  if (!token) {
-    redirect('/login');
-  }
-  return token;
-}
-
 export async function updateProfile(
   input: ProfileInput,
-): Promise<ProfileActionResult> {
+): Promise<ActionResult> {
   const parsed = profileSchema.safeParse(input);
   if (!parsed.success) {
     return { error: 'Dados inválidos' };
   }
 
   const { firstName, lastName, email } = parsed.data;
-  const token = await requireToken();
+  const token = await requireSessionToken();
 
   try {
     await apiFetch('/users/me', {
@@ -39,16 +30,12 @@ export async function updateProfile(
       body: { name: `${firstName} ${lastName}`.trim(), email },
     });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      redirect('/login');
-    }
-    if (error instanceof ApiError && error.status === 409) {
-      return { error: 'Este e-mail já está em uso' };
-    }
-    if (error instanceof ApiError && error.status < 500) {
-      return { error: 'Dados inválidos' };
-    }
-    return { error: 'Não foi possível salvar agora. Tente novamente.' };
+    return toActionError(error, {
+      messages: {
+        409: { field: 'email', message: 'Este e-mail já está em uso' },
+      },
+      fieldMap: { name: 'firstName' },
+    });
   }
 
   revalidatePath('/', 'layout');
@@ -57,14 +44,14 @@ export async function updateProfile(
 
 export async function updatePassword(
   input: PasswordInput,
-): Promise<ProfileActionResult> {
+): Promise<ActionResult> {
   const parsed = passwordSchema.safeParse(input);
   if (!parsed.success) {
     return { error: 'Dados inválidos' };
   }
 
   const { currentPassword, password } = parsed.data;
-  const token = await requireToken();
+  const token = await requireSessionToken();
 
   try {
     await apiFetch('/users/me/password', {
@@ -73,13 +60,11 @@ export async function updatePassword(
       body: { currentPassword, password },
     });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      redirect('/login');
-    }
-    if (error instanceof ApiError && error.status === 400) {
-      return { error: 'Senha atual incorreta' };
-    }
-    return { error: 'Não foi possível alterar a senha. Tente novamente.' };
+    return toActionError(error, {
+      messages: {
+        400: { field: 'currentPassword', message: 'Senha atual incorreta' },
+      },
+    });
   }
 
   return { success: 'Senha alterada' };
