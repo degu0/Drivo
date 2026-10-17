@@ -1,0 +1,26 @@
+# Dependências e builds: são gerados dentro da imagem
+node_modules
+.next
+out
+build
+coverage
+*.tsbuildinfo
+
+# Uploads locais, se existirem
+uploads
+
+# Variáveis de ambiente: NEXT_PUBLIC_API_URL chega como build arg
+.env*
+!.env.example
+
+# Logs, Git e editor
+*.log
+npm-debug.log*
+.git
+.gitignore
+.vscode
+.idea
+
+# Docker
+Dockerfile
+.dockerignore
