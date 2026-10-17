@@ -1,0 +1,1 @@
+{"version":3,"file":"update.dto.js","sourceRoot":"","sources":["../../../src/vehicles/dto/update.dto.ts"],"names":[],"mappings":";;;AAAA,2CAA0C;AAC1C,6CAIsB;AAET,QAAA,mBAAmB,GAAG,0BAAa;KAC7C,OAAO,EAAE;KACT,MAAM,CAAC,6BAAgB,EAAE;IACxB,OAAO,EAAE,+BAAkB;IAC3B,IAAI,EAAE,CAAC,WAAW,CAAC;CACpB,CAAC,CAAC;AAEL,MAAa,gBAAiB,SAAQ,IAAA,yBAAY,EAAC,2BAAmB,CAAC;CAAG;AAA1E,4CAA0E"}
