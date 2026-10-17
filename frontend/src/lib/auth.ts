@@ -7,6 +7,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
+  createdAt: string;
 };
 
 export async function getCurrentUser(): Promise<User> {
@@ -19,7 +20,12 @@ export async function getCurrentUser(): Promise<User> {
 
   try {
     const user = await apiFetch<User>('/users/me', { token });
-    return { id: user.id, name: user.name, email: user.email };
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+    };
   } catch {
     redirect('/login');
   }

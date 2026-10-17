@@ -1,5 +1,11 @@
 type UserAvatarProps = {
   name: string;
+  size?: "md" | "lg";
+};
+
+const sizeClass = {
+  md: "size-9 text-callout",
+  lg: "size-24 text-title-1",
 };
 
 function getInitials(name: string) {
@@ -12,11 +18,11 @@ function getInitials(name: string) {
   return (first + last).toUpperCase();
 }
 
-export function UserAvatar({ name }: UserAvatarProps) {
+export function UserAvatar({ name, size = "md" }: UserAvatarProps) {
   return (
     <div
       aria-hidden
-      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-callout font-semibold text-white"
+      className={`flex shrink-0 items-center justify-center rounded-full bg-accent font-semibold text-white ${sizeClass[size]}`}
     >
       {getInitials(name)}
     </div>
