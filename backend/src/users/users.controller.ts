@@ -69,6 +69,7 @@ export class UsersController {
   @Patch('me/password')
   @ApiOperation({ summary: 'Update current user password' })
   @ApiOkResponse({ description: 'Password updated successfully' })
+  @ApiBadRequestResponse({ description: 'Current password is incorrect' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'User not found' })
   async updateCurrentUserPassword(
@@ -77,6 +78,7 @@ export class UsersController {
   ) {
     const updatedPassword = await this.userService.updatePassword(
       currentUser.id,
+      data.currentPassword,
       data.password,
     );
 

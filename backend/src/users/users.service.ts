@@ -1,5 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { hashPassword } from 'src/auth/password';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
+import { comparePassword, hashPassword } from 'src/auth/password';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 export interface CreateUserData {
@@ -38,6 +42,13 @@ export class UsersService {
   }
 
   async updateCurrent(id: string, data: UpdateUserData) {
+    if (data.email) {
+      const existingUser = await this.findByEmail(data.email);
+      if (existingUser && existingUser.id !== id) {
+        throw new ConflictException('Email already in use');
+      }
+    }
+
     return await this.prisma.user.update({
       where: { id },
       data,
@@ -45,7 +56,23 @@ export class UsersService {
     });
   }
 
-  async updatePassword(id: string, password: string) {
+  async updatePassword(id: string, currentPassword: string, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { passwordHash: true },
+    });
+    if (!user) {
+      return false;
+    }
+
+    const passwordMatches = await comparePassword(
+      currentPassword,
+      user.passwordHash,
+    );
+    if (!passwordMatches) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
     const passwordHash = await hashPassword(password);
 
     await this.prisma.user.update({
