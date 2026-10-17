@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="pt-BR" className={`${appFont.variable} h-full antialiased`}>
-      <body className="min-h-full">
+      <body className="min-h-full font-sans">
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
