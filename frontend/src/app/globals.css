@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+@theme {
+  --color-background: #000000;
+  --color-surface: #1c1c1e;
+  --color-surface-2: #2c2c2e;
+  --color-surface-3: #3a3a3c;
+  --color-surface-4: #48484a;
+  --color-separator: #38383a;
+
+  --color-label: #f5f5f7;
+  --color-label-secondary: #a1a1a6;
+  --color-label-tertiary: #6e6e73;
+
+  --color-accent: #0a84ff;
+  --color-accent-hover: #3395ff;
+  --color-accent-pressed: #007aff;
+
+  --color-success: #30d158;
+  --color-warning: #ff9f0a;
+  --color-danger: #ff453a;
+
+  --text-large-title: 2.5rem;                 /* 40px */
+  --text-large-title--font-weight: 700;
+  --text-large-title--letter-spacing: -1.2px;
+  --text-large-title--line-height: 1.2;
+
+  --text-title-1: 2rem;                       /* 32px */
+  --text-title-1--font-weight: 700;
+  --text-title-1--letter-spacing: -0.8px;
+  --text-title-1--line-height: 1.2;
+
+  --text-title-2: 1.5rem;                     /* 24px */
+  --text-title-2--font-weight: 600;
+  --text-title-2--letter-spacing: -0.5px;
+  --text-title-2--line-height: 1.25;
+
+  --text-headline: 1.0625rem;                 /* 17px */
+  --text-headline--font-weight: 600;
+  --text-headline--letter-spacing: -0.3px;
+  --text-headline--line-height: 1.35;
+
+  --text-body: 0.9375rem;                     /* 15px */
+  --text-body--font-weight: 400;
+  --text-body--line-height: 1.5;
+
+  --text-callout: 0.875rem;                   /* 14px */
+  --text-callout--font-weight: 500;
+  --text-callout--line-height: 1.45;
+
+  --text-footnote: 0.8125rem;                 /* 13px */
+  --text-footnote--font-weight: 400;
+  --text-footnote--line-height: 1.4;
+
+  --text-mono: 0.9375rem;                     /* 15px */
+  --text-mono--font-weight: 500;
+  --text-mono--line-height: 1.5;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-label);
+  }
+}
