@@ -46,5 +46,5 @@ export declare class UsersService {
         createdAt: Date;
         updatedAt: Date;
     }>;
-    updatePassword(id: string, password: string): Promise<boolean>;
+    updatePassword(id: string, currentPassword: string, password: string): Promise<boolean>;
 }

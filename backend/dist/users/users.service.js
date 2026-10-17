@@ -36,13 +36,30 @@ let UsersService = class UsersService {
         });
     }
     async updateCurrent(id, data) {
+        if (data.email) {
+            const existingUser = await this.findByEmail(data.email);
+            if (existingUser && existingUser.id !== id) {
+                throw new common_1.ConflictException('Email already in use');
+            }
+        }
         return await this.prisma.user.update({
             where: { id },
             data,
             omit: { passwordHash: true },
         });
     }
-    async updatePassword(id, password) {
+    async updatePassword(id, currentPassword, password) {
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+            select: { passwordHash: true },
+        });
+        if (!user) {
+            return false;
+        }
+        const passwordMatches = await (0, password_1.comparePassword)(currentPassword, user.passwordHash);
+        if (!passwordMatches) {
+            throw new common_1.BadRequestException('Current password is incorrect');
+        }
         const passwordHash = await (0, password_1.hashPassword)(password);
         await this.prisma.user.update({
             where: { id },

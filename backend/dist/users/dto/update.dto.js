@@ -17,6 +17,9 @@ exports.updateUserSchema = zod_1.default.object({
     email: fields_1.emailField.optional(),
 });
 exports.updatePasswordSchema = zod_1.default.object({
+    currentPassword: zod_1.default
+        .string()
+        .min(1, { message: 'Current password is required' }),
     password: zod_1.default
         .string()
         .min(6, { message: 'Password must be at least 6 characters long' })

@@ -39,7 +39,7 @@ let UsersController = class UsersController {
         return updatedUser;
     }
     async updateCurrentUserPassword(currentUser, data) {
-        const updatedPassword = await this.userService.updatePassword(currentUser.id, data.password);
+        const updatedPassword = await this.userService.updatePassword(currentUser.id, data.currentPassword, data.password);
         if (!updatedPassword) {
             throw new common_1.NotFoundException('User not found');
         }
@@ -75,6 +75,7 @@ __decorate([
     (0, common_1.Patch)('me/password'),
     (0, swagger_1.ApiOperation)({ summary: 'Update current user password' }),
     (0, swagger_1.ApiOkResponse)({ description: 'Password updated successfully' }),
+    (0, swagger_1.ApiBadRequestResponse)({ description: 'Current password is incorrect' }),
     (0, swagger_1.ApiUnauthorizedResponse)({ description: 'Unauthorized' }),
     (0, swagger_1.ApiNotFoundResponse)({ description: 'User not found' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
