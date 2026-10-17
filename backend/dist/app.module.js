@@ -18,6 +18,7 @@ const nestjs_zod_1 = require("nestjs-zod");
 const users_module_1 = require("./users/users.module");
 const auth_module_1 = require("./auth/auth.module");
 const vehicles_module_1 = require("./vehicles/vehicles.module");
+const gemini_module_1 = require("./gemini/gemini.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,6 +34,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
             vehicles_module_1.VehiclesModule,
+            gemini_module_1.GeminiModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

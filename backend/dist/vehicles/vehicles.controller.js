@@ -14,12 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VehiclesController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const swagger_1 = require("@nestjs/swagger");
 const current_user_decorator_1 = require("../auth/decorators/current-user.decorator");
 const jwt_auth_guard_1 = require("../auth/guard/jwt-auth.guard");
 const create_dto_1 = require("./dto/create.dto");
 const update_dto_1 = require("./dto/update.dto");
 const vehicles_service_1 = require("./vehicles.service");
+const MAX_CRLV_SIZE = 5 * 1024 * 1024;
 let VehiclesController = class VehiclesController {
     vehiclesService;
     constructor(vehiclesService) {
@@ -27,6 +29,9 @@ let VehiclesController = class VehiclesController {
     }
     createVehicle(currentUser, data) {
         return this.vehiclesService.create(currentUser.id, data);
+    }
+    scanCrlv(file) {
+        return this.vehiclesService.scanCrlv(file);
     }
     getAllVehicles(currentUser) {
         return this.vehiclesService.findAllByUser(currentUser.id);
@@ -72,6 +77,42 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_dto_1.CreateVehicleDto]),
     __metadata("design:returntype", void 0)
 ], VehiclesController.prototype, "createVehicle", null);
+__decorate([
+    (0, common_1.Post)('crlv/scan'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    (0, swagger_1.ApiOperation)({ summary: 'Scan a CRLV file' }),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            required: ['file'],
+            properties: { file: { type: 'string', format: 'binary' } },
+        },
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Extracted data; unidentified fields are returned as null',
+    }),
+    (0, swagger_1.ApiBadRequestResponse)({
+        description: 'File missing, too large or of an invalid type',
+    }),
+    (0, swagger_1.ApiUnprocessableEntityResponse)({
+        description: 'The file does not appear to be a CRLV',
+    }),
+    (0, swagger_1.ApiTooManyRequestsResponse)({ description: 'AI usage limit reached' }),
+    (0, swagger_1.ApiBadGatewayResponse)({ description: 'Failed to communicate with the AI service' }),
+    __param(0, (0, common_1.UploadedFile)(new common_1.ParseFilePipe({
+        validators: [
+            new common_1.MaxFileSizeValidator({ maxSize: MAX_CRLV_SIZE }),
+            new common_1.FileTypeValidator({
+                fileType: /^(image\/(jpeg|png)|application\/pdf)$/,
+            }),
+        ],
+    }))),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "scanCrlv", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all vehicles for the current user' }),

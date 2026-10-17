@@ -12,10 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VehiclesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const crlv_schema_1 = require("./crlv/crlv.schema");
+const gemini_service_1 = require("../gemini/gemini.service");
+const crlv_prompt_1 = require("./crlv/crlv.prompt");
 let VehiclesService = class VehiclesService {
     prisma;
-    constructor(prisma) {
+    geminiService;
+    constructor(prisma, geminiService) {
         this.prisma = prisma;
+        this.geminiService = geminiService;
     }
     findAllByUser(userId) {
         return this.prisma.vehicle.findMany({
@@ -44,10 +49,25 @@ let VehiclesService = class VehiclesService {
             where: { id, userId },
         });
     }
+    async scanCrlv(file) {
+        const raw = await this.geminiService.extractFromFile({
+            file: file.buffer,
+            mimeType: file.mimetype,
+            prompt: crlv_prompt_1.CRLV_PROMPT,
+            responseJsonSchema: crlv_schema_1.crlvAiJsonSchema,
+        });
+        const result = crlv_schema_1.crlvExtractedSchema.safeParse(raw);
+        if (!result.success || !result.data.isCrlv) {
+            throw new common_1.UnprocessableEntityException('Could not identify a CRLV in the uploaded file');
+        }
+        const { isCrlv, ...data } = result.data;
+        return data;
+    }
 };
 exports.VehiclesService = VehiclesService;
 exports.VehiclesService = VehiclesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        gemini_service_1.GeminiService])
 ], VehiclesService);
 //# sourceMappingURL=vehicles.service.js.map

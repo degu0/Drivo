@@ -9,6 +9,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
+import { GeminiModule } from './gemini/gemini.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
     UsersModule,
     AuthModule,
     VehiclesModule,
+    GeminiModule,
   ],
   controllers: [AppController],
   providers: [

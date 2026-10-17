@@ -77,8 +77,6 @@ export function isValidModelYear(data: {
 export const MODEL_YEAR_MESSAGE =
   'Model year must be the manufacture year or the next one';
 
-// O objeto de opções é criado aqui dentro porque o Zod 4 altera o objeto
-// passado para o .refine() (move "message" para "error")
 export const createVehicleSchema = vehicleFields.refine(isValidModelYear, {
   message: MODEL_YEAR_MESSAGE,
   path: ['modelYear'],

@@ -3,27 +3,39 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   HttpCode,
   HttpStatus,
+  MaxFileSizeValidator,
   NotFoundException,
   Param,
+  ParseFilePipe,
   ParseUUIDPipe,
   Patch,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { Multer } from 'multer';
 import {
+  ApiBadGatewayResponse,
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiConflictResponse,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -35,6 +47,8 @@ import {
 } from './dto/create.dto';
 import { UpdateVehicleDto } from './dto/update.dto';
 import { VehiclesService } from './vehicles.service';
+
+const MAX_CRLV_SIZE = 5 * 1024 * 1024;
 
 @ApiTags('Vehicles')
 @ApiBearerAuth()
@@ -56,6 +70,45 @@ export class VehiclesController {
     @Body() data: CreateVehicleDto,
   ) {
     return this.vehiclesService.create(currentUser.id, data);
+  }
+
+  @Post('crlv/scan')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Scan a CRLV file' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Extracted data; unidentified fields are returned as null',
+  })
+  @ApiBadRequestResponse({
+    description: 'File missing, too large or of an invalid type',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'The file does not appear to be a CRLV',
+  })
+  @ApiTooManyRequestsResponse({ description: 'AI usage limit reached' })
+  @ApiBadGatewayResponse({ description: 'Failed to communicate with the AI service' })
+  scanCrlv(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: MAX_CRLV_SIZE }),
+          new FileTypeValidator({
+            fileType: /^(image\/(jpeg|png)|application\/pdf)$/,
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.vehiclesService.scanCrlv(file);
   }
 
   @Get()

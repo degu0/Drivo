@@ -1,5 +1,7 @@
 import { FuelType, VehicleType } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { CrlvExtractedData } from './crlv/crlv.schema';
+import { GeminiService } from '../gemini/gemini.service';
 export interface CreateVehicleData {
     imageUrl?: string;
     plate: string;
@@ -17,7 +19,8 @@ export interface CreateVehicleData {
 export type UpdateVehicleData = Partial<CreateVehicleData>;
 export declare class VehiclesService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly geminiService;
+    constructor(prisma: PrismaService, geminiService: GeminiService);
     findAllByUser(userId: string): import("../generated/prisma/internal/prismaNamespace").PrismaPromise<{
         type: VehicleType;
         id: string;
@@ -116,4 +119,5 @@ export declare class VehiclesService {
     }, never, import("@prisma/client/runtime/client").DefaultArgs, {
         omit: import("../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
     }>;
+    scanCrlv(file: Express.Multer.File): Promise<CrlvExtractedData>;
 }

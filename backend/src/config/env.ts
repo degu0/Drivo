@@ -4,6 +4,8 @@ export const envSchema = z.object({
   DATABASE_URL: z.url(),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('1d'),
+  GEMINI_API_KEY: z.string().min(1),
+  GEMINI_TEXT_MODEL: z.string().min(1),
   PORT: z.coerce.number().int().positive().default(3333),
   CORS_ORIGIN: z.url().default('http://localhost:3000'),
 });

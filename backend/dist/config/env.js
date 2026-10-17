@@ -7,6 +7,8 @@ exports.envSchema = zod_1.z.object({
     DATABASE_URL: zod_1.z.url(),
     JWT_SECRET: zod_1.z.string().min(32),
     JWT_EXPIRES_IN: zod_1.z.string().default('1d'),
+    GEMINI_API_KEY: zod_1.z.string().min(1),
+    GEMINI_TEXT_MODEL: zod_1.z.string().min(1),
     PORT: zod_1.z.coerce.number().int().positive().default(3333),
     CORS_ORIGIN: zod_1.z.url().default('http://localhost:3000'),
 });
