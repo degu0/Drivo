@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { RegisterForm } from "@/features/auth/register-form";
 import Image from "next/image";
 
-import bgRegister from "../../../public/register_image.jpg";
+import bgRegister from "../../../public/images/auth/register.jpg";
 
 export const metadata: Metadata = {
   title: "Criar conta · Drivo",

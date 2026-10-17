@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LoginForm } from "@/features/auth/login-form";
 import Image from "next/image";
 
-import bgLogin from "../../../public/login_image.jpg";
+import bgLogin from "../../../public/images/auth/login.jpg";
 
 export const metadata: Metadata = {
   title: "Entrar · Drivo",

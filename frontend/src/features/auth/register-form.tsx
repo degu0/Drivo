@@ -8,7 +8,7 @@ import { registerSchema, type RegisterInput } from "./schemas";
 import Image from "next/image";
 import Link from "next/link";
 
-import iconCar from "../../../public/icon_car.png";
+import iconCar from "../../../public/images/icons/car.png";
 
 const inputClass =
   "h-14 w-full rounded-xl border border-separator bg-surface-2 px-5 text-headline font-normal text-label outline-none transition placeholder:text-label-tertiary focus:border-accent aria-invalid:border-danger";

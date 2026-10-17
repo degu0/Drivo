@@ -1,13 +1,22 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import type { Vehicle } from "./api";
+import type { Vehicle, VehicleType } from "./api";
 import { colorHex, formatPlate, fuelLabel, maskChassis } from "./labels";
 
-import iconCar from "../../../public/icon_car.png";
+import iconCar from "../../../public/images/icons/car.png";
+import carImage from "../../../public/images/vehicles/car.jpg";
+import motorcycleImage from "../../../public/images/vehicles/motorcycle.jpg";
+
+// Foto padrão por tipo, usada quando o veículo não tem imagem própria.
+const defaultImageByType: Partial<Record<VehicleType, StaticImageData>> = {
+  CARRO: carImage,
+  MOTO: motorcycleImage,
+};
 
 export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   const title = vehicle.nickname || vehicle.model;
   const years = `${vehicle.manufactureYear}/${vehicle.modelYear}`;
+  const defaultImage = defaultImageByType[vehicle.type];
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl bg-surface">
@@ -18,6 +27,15 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
             alt={title}
             fill
             unoptimized
+            className="object-cover"
+          />
+        ) : defaultImage ? (
+          <Image
+            src={defaultImage}
+            alt={title}
+            fill
+            placeholder="blur"
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover"
           />
         ) : (

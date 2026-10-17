@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { NavTabs } from "./NavTabs";
 import { UserAvatar } from "./UserAvatar";
 
-import iconCar from "../../../public/icon_car.png";
+import iconCar from "../../../public/images/icons/car.png";
 
 export function Header() {
   return (
