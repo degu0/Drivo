@@ -6,12 +6,12 @@ import { colorHex, formatPlate, fuelLabel, maskChassis } from "./labels";
 import iconCar from "../../../public/icon_car.png";
 
 export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
-  const title = vehicle.nickname ?? vehicle.model;
+  const title = vehicle.nickname || vehicle.model;
   const years = `${vehicle.manufactureYear}/${vehicle.modelYear}`;
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl bg-surface">
-      <div className="relative flex aspect-[16/10] items-center justify-center bg-surface-2">
+      <div className="relative flex aspect-16/10 items-center justify-center bg-surface-2">
         {vehicle.imageUrl ? (
           <Image
             src={vehicle.imageUrl}

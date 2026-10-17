@@ -1,5 +1,5 @@
 import 'server-only';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
 import { getSessionToken } from '@/lib/session';
 
@@ -51,6 +51,30 @@ export async function getVehicles(): Promise<Vehicle[]> {
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
       redirect('/login');
+    }
+    throw error;
+  }
+}
+
+export async function getVehicle(id: string): Promise<Vehicle> {
+  'use cache: private';
+
+  const token = await getSessionToken();
+  if (!token) {
+    redirect('/login');
+  }
+
+  try {
+    return await apiFetch<Vehicle>(`/vehicles/${id}`, { token });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      redirect('/login');
+    }
+    if (
+      error instanceof ApiError &&
+      (error.status === 400 || error.status === 404)
+    ) {
+      notFound();
     }
     throw error;
   }

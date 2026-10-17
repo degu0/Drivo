@@ -19,19 +19,29 @@ export async function apiFetch<T>(
   path: string,
   { body, token, headers, ...init }: ApiFetchOptions = {},
 ): Promise<T> {
+  const isFormData = body instanceof FormData;
+
   const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      ...(!isFormData && { 'Content-Type': 'application/json' }),
       ...(token && { Authorization: `Bearer ${token}` }),
       ...headers,
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: isFormData
+      ? body
+      : body === undefined
+        ? undefined
+        : JSON.stringify(body),
   });
 
   if (!response.ok) {
     const data = await response.json().catch(() => null);
     throw new ApiError(response.status, data?.message ?? response.statusText);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;

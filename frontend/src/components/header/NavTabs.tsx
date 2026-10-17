@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -8,14 +9,30 @@ const tabs = [
   { href: "/profile", label: "Perfil" },
 ];
 
-export function NavTabs() {
-  const pathname = usePathname();
+function isTabActive(href: string, pathname: string) {
+  return href === "/"
+    ? pathname === "/" || pathname.startsWith("/vehicles")
+    : pathname.startsWith(href);
+}
 
+export function NavTabs() {
+  return (
+    <Suspense fallback={<TabList />}>
+      <ActiveTabList />
+    </Suspense>
+  );
+}
+
+function ActiveTabList() {
+  return <TabList pathname={usePathname()} />;
+}
+
+function TabList({ pathname }: { pathname?: string }) {
   return (
     <nav className="flex w-full items-center gap-1 rounded-xl bg-surface p-1 md:w-auto">
       {tabs.map((tab) => {
         const isActive =
-          tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+          pathname !== undefined && isTabActive(tab.href, pathname);
 
         return (
           <Link
