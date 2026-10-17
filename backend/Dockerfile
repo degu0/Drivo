@@ -3,6 +3,7 @@ ARG NPM_VERSION=11.6.1
 
 FROM ${NODE_IMAGE} AS build
 ARG NPM_VERSION
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 RUN npm install -g npm@${NPM_VERSION}
 WORKDIR /app
 
@@ -17,6 +18,7 @@ COPY . .
 RUN npm run build
 
 FROM ${NODE_IMAGE} AS runtime
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV NODE_ENV=production
 
